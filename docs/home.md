@@ -1,4 +1,5 @@
 ---
+title: Apache Mesos - Documentation Home
 layout: documentation
 ---
 
@@ -21,19 +22,20 @@ layout: documentation
   * [Docker Containerizer](docker-containerizer.md) for launching a Docker image as a Task, or as an Executor.
   * [External Containerizer](external-containerizer.md) for custom containerization implementations (deprecated).
 * [Roles](roles.md)
-* [Framework Authentication](authentication.md)
-* [Framework Authorization](authorization.md)
+* [Weights](weights.md)
+* [Authentication](authentication.md)
+* [Authorization](authorization.md)
 * [Framework Rate Limiting](framework-rate-limiting.md)
 * [Logging](logging.md)
 * [High Availability](high-availability.md) for running multiple masters simultaneously.
 * [Operational Guide](operational-guide.md)
 * [Monitoring](monitoring.md)
 * [Network Monitoring and Isolation](network-monitoring.md)
-* [Slave Recovery](slave-recovery.md) for doing seamless upgrades.
+* [Slave Recovery](slave-recovery.md) for doing seamless slave upgrades and allowing executors to survive `mesos-slave` crashes.
 * [Maintenance](maintenance.md) for performing maintenance on a Mesos cluster.
 * [Tools](tools.md) for setting up and running a Mesos cluster.
 * [SSL](ssl.md) for enabling and enforcing SSL communication.
-* [Mesos Image Provisioner](mesos-provisioner.md) for provisioning container filesystems from different image formats.
+* [Container Image](container-image.md) for supporting container images in Mesos containerizer.
 
 ## Advanced Features
 

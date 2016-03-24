@@ -1,6 +1,11 @@
+---
+title: Apache Mesos - HTTP Endpoints - /state
+layout: documentation
+---
 <!--- This is an automatically generated file. DO NOT EDIT! --->
 
 ### USAGE ###
+>        /state
 >        /slave(1)/state
 
 ### TL;DR; ###
@@ -80,12 +85,10 @@ Example (**Note**: this is not exhaustive):
          "work_dir" : "/tmp/mesos",
          "launcher_dir" : "/path/to/mesos/build/src",
          "registration_backoff_factor" : "1secs",
-         "docker_auth_server" : "https://auth.docker.io",
          "oversubscribed_resources_interval" : "15secs",
          "enforce_container_disk_quota" : "false",
          "container_disk_watch_interval" : "15secs",
          "disk_watch_interval" : "1mins",
-         "docker_puller_timeout" : "60",
          "cgroups_limit_swap" : "false",
          "hostname_lookup" : "true",
          "perf_duration" : "10secs",
@@ -95,3 +98,8 @@ Example (**Note**: this is not exhaustive):
     },
 }
 ```
+
+
+### AUTHENTICATION ###
+This endpoint requires authentication iff HTTP authentication is
+enabled.

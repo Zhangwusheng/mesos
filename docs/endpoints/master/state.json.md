@@ -1,6 +1,11 @@
+---
+title: Apache Mesos - HTTP Endpoints - /state.json
+layout: documentation
+---
 <!--- This is an automatically generated file. DO NOT EDIT! --->
 
 ### USAGE ###
+>        /state.json
 >        /master/state.json
 
 ### TL;DR; ###
@@ -79,3 +84,8 @@ Example (**Note**: this is not exhaustive):
     "unregistered_frameworks" : []
 }
 ```
+
+
+### AUTHENTICATION ###
+This endpoint requires authentication iff HTTP authentication is
+enabled.

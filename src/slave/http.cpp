@@ -51,7 +51,7 @@
 #include "slave/slave.hpp"
 #include "slave/validation.hpp"
 
-
+using process::AUTHENTICATION;
 using process::Clock;
 using process::DESCRIPTION;
 using process::Future;
@@ -210,7 +210,8 @@ string Slave::Http::EXECUTOR_HELP() {
         "transfer encoding. The executors can process the response",
         "incrementally.",
         "Returns 202 Accepted for all other Call messages iff the",
-        "request is accepted."));
+        "request is accepted."),
+    AUTHENTICATION(false));
 }
 
 
@@ -347,11 +348,16 @@ Future<Response> Slave::Http::executor(const Request& request) const
 
 string Slave::Http::FLAGS_HELP()
 {
-  return HELP(TLDR("Exposes the agent's flag configuration."));
+  return HELP(
+    TLDR("Exposes the agent's flag configuration."),
+    None(),
+    AUTHENTICATION(true));
 }
 
 
-Future<Response> Slave::Http::flags(const Request& request) const
+Future<Response> Slave::Http::flags(
+    const Request& request,
+    const Option<string>& /* principal */) const
 {
   JSON::Object object;
 
@@ -377,7 +383,8 @@ string Slave::Http::HEALTH_HELP()
         "Health check of the Slave."),
     DESCRIPTION(
         "Returns 200 OK iff the Slave is healthy.",
-        "Delayed responses are also indicative of poor health."));
+        "Delayed responses are also indicative of poor health."),
+    AUTHENTICATION(false));
 }
 
 
@@ -465,12 +472,10 @@ string Slave::Http::STATE_HELP() {
         "         \"work_dir\" : \"/tmp/mesos\",",
         "         \"launcher_dir\" : \"/path/to/mesos/build/src\",",
         "         \"registration_backoff_factor\" : \"1secs\",",
-        "         \"docker_auth_server\" : \"https://auth.docker.io\",",
         "         \"oversubscribed_resources_interval\" : \"15secs\",",
         "         \"enforce_container_disk_quota\" : \"false\",",
         "         \"container_disk_watch_interval\" : \"15secs\",",
         "         \"disk_watch_interval\" : \"1mins\",",
-        "         \"docker_puller_timeout\" : \"60\",",
         "         \"cgroups_limit_swap\" : \"false\",",
         "         \"hostname_lookup\" : \"true\",",
         "         \"perf_duration\" : \"10secs\",",
@@ -479,11 +484,14 @@ string Slave::Http::STATE_HELP() {
         "         \"version\" : \"false\"",
         "    },",
         "}",
-        "```"));
+        "```"),
+    AUTHENTICATION(true));
 }
 
 
-Future<Response> Slave::Http::state(const Request& request) const
+Future<Response> Slave::Http::state(
+    const Request& request,
+    const Option<string>& /* principal */) const
 {
   if (slave->state == Slave::RECOVERING) {
     return ServiceUnavailable("Agent has not finished recovery");

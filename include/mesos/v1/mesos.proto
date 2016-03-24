@@ -258,6 +258,12 @@ message FrameworkInfo {
 
   message Capability {
     enum Type {
+      // This must be the first enum value in this list, to
+      // ensure that if 'type' is not set, the default value
+      // is UNKNOWN. This enables enum values to be added
+      // in a backwards-compatible way. See: MESOS-4997.
+      UNKNOWN = 0;
+
       // Receive offers with revocable resources. See 'Resource'
       // message for details.
       // TODO(vinod): This is currently a no-op.
@@ -269,7 +275,8 @@ message FrameworkInfo {
       TASK_KILLING_STATE = 2;
     }
 
-    required Type type = 1;
+    // Enum fields should be optional, see: MESOS-4997.
+    optional Type type = 1;
   }
 
   // This field allows a framework to advertise its set of
@@ -375,6 +382,11 @@ message CommandInfo {
     // downloading. See also "docs/fetcher.md" and
     // "docs/fetcher-cache-internals.md".
     optional bool cache = 4;
+
+    // The fetcher's default behavior is to use the URI string's basename to
+    // name the local copy. If this field is provided, the local copy will be
+    // named with its value instead.
+    optional string filename = 5;
   }
 
   repeated URI uris = 1;
@@ -413,10 +425,12 @@ message ExecutorInfo {
   required ExecutorID executor_id = 1;
   optional FrameworkID framework_id = 8; // TODO(benh): Make this required.
   required CommandInfo command = 7;
+
   // Executor provided with a container will launch the container
   // with the executor's CommandInfo and we expect the container to
   // act as a Mesos executor.
   optional ContainerInfo container = 11;
+
   repeated Resource resources = 5;
   optional string name = 9;
 
@@ -481,9 +495,7 @@ message MasterInfo {
 /**
  * Describes an agent. Note that the 'id' field is only available
  * after an agent is registered with the master, and is made available
- * here to facilitate re-registration.  If checkpoint is set, the
- * agent is checkpointing its own information and potentially
- * frameworks' information (if a framework has checkpointing enabled).
+ * here to facilitate re-registration.
  */
 message AgentInfo {
   required string hostname = 1;
@@ -507,6 +519,14 @@ message Value {
   }
 
   message Scalar {
+    // Scalar values are represented using floating point. To reduce
+    // the chance of unpredictable floating point behavior due to
+    // roundoff error, Mesos only supports three decimal digits of
+    // precision for scalar resource values. That is, floating point
+    // values are converted to a fixed point format that supports
+    // three decimal digits of precision, and then converted back to
+    // floating point on output. Any additional precision in scalar
+    // resource values is discarded (via rounding).
     required double value = 1;
   }
 
@@ -583,16 +603,12 @@ message Resource {
     // NOTE: We currently do not allow frameworks with role "*" to
     // make dynamic reservations.
 
-    // This field indicates the principal of the framework or operator
+    // Indicates the principal, if any, of the framework or operator
     // that reserved this resource. If reserved by a framework, the
     // field should match the `FrameworkInfo.principal`. It is used in
     // conjunction with the `UnreserveResources` ACL to determine
     // whether the entity attempting to unreserve this resource is
     // permitted to do so.
-    //
-    // NOTE: Currently, a principal is required in order to reserve
-    // resources, so the master disallows any reserve operations
-    // without a principal. This constraint will be removed in 0.28.
     optional string principal = 1;
 
     // Labels are free-form key value pairs that can be used to
@@ -737,6 +753,99 @@ message TrafficControlStatistics {
 }
 
 
+message IpStatistics {
+  optional int64 Forwarding =  1;
+  optional int64 DefaultTTL =  2;
+  optional int64 InReceives =  3;
+  optional int64 InHdrErrors =  4;
+  optional int64 InAddrErrors =  5;
+  optional int64 ForwDatagrams =  6;
+  optional int64 InUnknownProtos = 7;
+  optional int64 InDiscards =  8;
+  optional int64 InDelivers  = 9;
+  optional int64 OutRequests = 10;
+  optional int64 OutDiscards = 11;
+  optional int64 OutNoRoutes = 12;
+  optional int64 ReasmTimeout = 13;
+  optional int64 ReasmReqds = 14;
+  optional int64 ReasmOKs = 15;
+  optional int64 ReasmFails = 16;
+  optional int64 FragOKs = 17;
+  optional int64 FragFails = 18;
+  optional int64 FragCreates = 19;
+}
+
+
+message IcmpStatistics {
+  optional int64 InMsgs = 1;
+  optional int64 InErrors =  2;
+  optional int64 InCsumErrors = 3;
+  optional int64 InDestUnreachs =  4;
+  optional int64 InTimeExcds = 5;
+  optional int64 InParmProbs =  6;
+  optional int64 InSrcQuenchs = 7;
+  optional int64 InRedirects = 8;
+  optional int64 InEchos = 9;
+  optional int64 InEchoReps = 10;
+  optional int64 InTimestamps = 11;
+  optional int64 InTimestampReps = 12;
+  optional int64 InAddrMasks = 13;
+  optional int64 InAddrMaskReps = 14;
+  optional int64 OutMsgs = 15;
+  optional int64 OutErrors = 16;
+  optional int64 OutDestUnreachs = 17;
+  optional int64 OutTimeExcds = 18;
+  optional int64 OutParmProbs = 19;
+  optional int64 OutSrcQuenchs = 20;
+  optional int64 OutRedirects = 21;
+  optional int64 OutEchos = 22;
+  optional int64 OutEchoReps = 23;
+  optional int64 OutTimestamps = 24;
+  optional int64 OutTimestampReps = 25;
+  optional int64 OutAddrMasks = 26;
+  optional int64 OutAddrMaskReps = 27;
+}
+
+
+message TcpStatistics {
+  optional int64 RtoAlgorithm = 1;
+  optional int64 RtoMin = 2;
+  optional int64 RtoMax = 3;
+  optional int64 MaxConn = 4;
+  optional int64 ActiveOpens = 5;
+  optional int64 PassiveOpens = 6;
+  optional int64 AttemptFails = 7;
+  optional int64 EstabResets = 8;
+  optional int64 CurrEstab = 9;
+  optional int64 InSegs = 10;
+  optional int64 OutSegs = 11;
+  optional int64 RetransSegs = 12;
+  optional int64 InErrs = 13;
+  optional int64 OutRsts = 14;
+  optional int64 InCsumErrors = 15;
+}
+
+
+message UdpStatistics {
+  optional int64 InDatagrams = 1;
+  optional int64 NoPorts = 2;
+  optional int64 InErrors = 3;
+  optional int64 OutDatagrams = 4;
+  optional int64 RcvbufErrors = 5;
+  optional int64 SndbufErrors = 6;
+  optional int64 InCsumErrors = 7;
+  optional int64 IgnoredMulti = 8;
+}
+
+
+message SNMPStatistics {
+  optional IpStatistics ip_stats = 1;
+  optional IcmpStatistics icmp_stats = 2;
+  optional TcpStatistics tcp_stats = 3;
+  optional UdpStatistics udp_stats = 4;
+}
+
+
 /**
  * A snapshot of resource usage statistics.
  */
@@ -838,6 +947,9 @@ message ResourceStatistics {
   // or dropped due to congestion or policy inside and outside the
   // container.
   repeated TrafficControlStatistics net_traffic_control_statistics = 35;
+
+  // Network SNMP statistics for each container.
+  optional SNMPStatistics net_snmp_statistics = 42;
 }
 
 
@@ -1089,13 +1201,16 @@ message TaskInfo {
   repeated Resource resources = 4;
   optional ExecutorInfo executor = 5;
   optional CommandInfo command = 7;
+
   // Task provided with a container will launch the container as part
   // of this task paired with the task's CommandInfo.
   optional ContainerInfo container = 9;
-  optional bytes data = 6;
-  // A health check for the task (currently in *alpha* and initial
-  // support will only be for TaskInfo's that have a CommandInfo).
+
+  // A health check for the task, currently only supported for
+  // command tasks (i.e. `CommandInfo` is set).
   optional HealthCheck health_check = 8;
+
+  optional bytes data = 6;
 
   // Labels are free-form key value pairs which are exposed through
   // master and agent endpoints. Labels will not be interpreted or
@@ -1478,6 +1593,11 @@ message NetworkInfo {
   // this field is filled in automatically with the Agent IP address.
   repeated IPAddress ip_addresses = 5;
 
+  // Name of the network which will be used by network isolator to determine
+  // the network that the container joins. It's up to the network isolator
+  // to decide how to interpret this field.
+  optional string name = 6;
+
   // Specify IP address requirement. Set protocol to the desired value to
   // request the network isolator on the Agent to assign an IP address to the
   // container being launched. If a specific IP address is specified in
@@ -1627,15 +1747,19 @@ message Label {
 message Port {
   // Port number on which the framework exposes a service.
   required uint32 number = 1;
+
   // Name of the service hosted on this port.
   optional string name = 2;
+
   // Layer 4-7 protocol on which the framework exposes its services.
   optional string protocol = 3;
+
   // This field restricts discovery within a framework (FRAMEWORK),
   // within a Mesos cluster (CLUSTER), or places no restrictions (EXTERNAL).
   // The visibility setting for a Port overrides the general visibility setting
   // in the DiscoveryInfo.
   optional DiscoveryInfo.Visibility visibility = 4;
+
   // This can be used to decorate the message with metadata to be
   // interpreted by external applications such as firewalls.
   optional Labels labels = 5;
